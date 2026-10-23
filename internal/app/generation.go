@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"time"
 
+	jsonschema "github.com/hedgehog-pm/schema"
+
 	"github.com/hedgehog-pm/tailor/internal/codegen"
 	"github.com/hedgehog-pm/tailor/internal/config"
 	"github.com/hedgehog-pm/tailor/internal/generated/schemas"
@@ -55,7 +57,17 @@ func Run(ctx context.Context, cfg config.Config) (codegen.Result, error) {
 		)
 	}
 
-	projected, err := schema.Project(ctx, *response.JSON200, cfg.Fields)
+	compiler, err := jsonschema.New(1)
+	if err != nil {
+		return codegen.Result{}, err
+	}
+
+	document, err := compiler.Compile(*response.JSON200)
+	if err != nil {
+		return codegen.Result{}, fmt.Errorf("compile schema: %w", err)
+	}
+
+	projected, err := schema.Project(ctx, document, cfg.Fields)
 	if err != nil {
 		return codegen.Result{}, fmt.Errorf("project schema: %w", err)
 	}

@@ -9,9 +9,7 @@ import (
 	"slices"
 
 	"github.com/atombender/go-jsonschema/pkg/schemas"
-	"github.com/speakeasy-api/openapi/jsonschema/oas3"
-	"github.com/speakeasy-api/openapi/marshaller"
-	"github.com/speakeasy-api/openapi/yml"
+	jsonschema "github.com/hedgehog-pm/schema"
 )
 
 // Project возвращает json-схему, в которой от исходной остались только
@@ -20,40 +18,17 @@ import (
 // сгенерировать их полные Go-типы.
 func Project(
 	ctx context.Context,
-	data []byte,
+	source *jsonschema.Schema,
 	fields []string,
 ) (*schemas.Schema, error) {
-	var input oas3.JSONSchema[oas3.Referenceable]
-
-	warnings, err := marshaller.Unmarshal(ctx, bytes.NewReader(data), &input)
-	if err := errors.Join(append(warnings, err)...); err != nil {
-		return nil, fmt.Errorf("decode schema: %w", err)
-	}
-
 	// Раскрываем ссылки до удаления частей allOf, чтобы сохранить описания,
 	// на которые ссылаются выбранные поля.
-	inlined, err := oas3.Inline(ctx, &input, oas3.InlineOptions{
-		ResolveOptions: oas3.ResolveOptions{
-			RootDocument:        &input,
-			DisableExternalRefs: true,
-		},
-		RemoveUnusedDefs: true,
-	})
+	inlined, err := source.Inline(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("resolve schema references: %w", err)
+		return nil, err
 	}
 
-	var buffer bytes.Buffer
-
-	ctx = yml.ContextWithConfig(
-		ctx,
-		&yml.Config{OutputFormat: yml.OutputFormatJSON},
-	)
-	if err := marshaller.Marshal(ctx, inlined, &buffer); err != nil {
-		return nil, fmt.Errorf("prepare schema: %w", err)
-	}
-
-	document, err := schemas.FromJSONReader(&buffer)
+	document, err := schemas.FromJSONReader(bytes.NewReader(inlined))
 	if err != nil {
 		return nil, err
 	}
