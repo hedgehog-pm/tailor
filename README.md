@@ -1,7 +1,7 @@
 # tailor
 
 `tailor` — инструмент для сервисов, которые работают с контрактами из
-`service-task-shemas`. Он генерирует типы для
+[service-task-shemas](../service-task-shemas/README.md). Он генерирует типы для
 нужных полей контракта, чтобы не описывать эти структуры вручную.
 
 Утилита получает схему по `slug` и `version` и выбирает указанные поля,
@@ -13,3 +13,6 @@
 ```go
 //go:generate tailor --slug bug --version 1 --fields title,severity --out internal/generated/bug.go
 ```
+
+Результат записывается в файл из `--out`. При ошибке прежний файл остаётся
+неизменным.
