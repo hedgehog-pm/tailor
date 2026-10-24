@@ -3,7 +3,7 @@ package: taskschemas
 generate:
   client: true
   models: true
-output: internal/generated/clients/taskschemas/client.gen.go
+output: internal/generated/clients/taskschemas/client.go
 output-options:
   include-operation-ids:
     - getSchema
