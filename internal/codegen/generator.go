@@ -19,7 +19,7 @@ type Result struct {
 // чтобы не пропустить потерю типизации.
 func Generate(
 	document *schemas.Schema,
-	slug, packageName string,
+	typeName, packageName string,
 ) ([]byte, error) {
 	var warnings []string
 
@@ -29,6 +29,12 @@ func Generate(
 		ResolveExtensions:  []string{".json"},
 		Tags:               []string{"json"},
 		OnlyModels:         true,
+		SchemaMappings: []generator.SchemaMapping{{
+			SchemaID:    document.ID,
+			RootType:    typeName,
+			OutputName:  "types.go",
+			PackageName: packageName,
+		}},
 		Warner: func(message string) {
 			warnings = append(warnings, message)
 		},
@@ -37,10 +43,9 @@ func Generate(
 		return nil, err
 	}
 
-	// AddFile требует имя файла как идентификатор схемы. Из него генератор
-	// берёт имя для типа, который соответствует всей схеме целиком.
-	// Файл при этом не читается, схема уже передана напрямую.
-	if err := g.AddFile(slug+".json", document); err != nil {
+	// Имя корневого DTO задаём явно, чтобы шаблон клиента ссылался на тот же тип.
+	// AddFile не читает файл: схема уже передана напрямую.
+	if err := g.AddFile(typeName+".json", document); err != nil {
 		return nil, fmt.Errorf("go-jsonschema: %w", err)
 	}
 

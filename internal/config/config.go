@@ -24,6 +24,13 @@ func Prepare(cfg Config) (Config, error) {
 		return Config{}, errors.New("SERVICE_TASK_SCHEMAS_URL is not set")
 	}
 
+	switch filepath.Base(cfg.Out) {
+	case "client.go", "http_client.go":
+		return Config{}, errors.New(
+			"--out must differ from the generated client.go and http_client.go",
+		)
+	}
+
 	if cfg.Package == "" {
 		name, err := packageName(cfg.Out)
 		if err != nil {

@@ -41,7 +41,7 @@ func NewCommand() (*cobra.Command, error) {
 
 	command := &cobra.Command{
 		Use:           "tailor",
-		Short:         "Генерация типов по выбранным полям схемы",
+		Short:         "Генерация типов и клиента по выбранным полям схемы",
 		Args:          cobra.NoArgs,
 		SilenceUsage:  true,
 		SilenceErrors: true,
@@ -72,7 +72,7 @@ func NewCommand() (*cobra.Command, error) {
 		nil,
 		"имена полей через запятую",
 	)
-	flags.StringVar(&options.Out, "out", "", "путь к результирующему файлу")
+	flags.StringVar(&options.Out, "out", "", "путь к файлу типов")
 	flags.StringVar(
 		&options.Package,
 		"package",

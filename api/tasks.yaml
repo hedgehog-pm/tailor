@@ -1,0 +1,169 @@
+openapi: 3.0.3
+info:
+  title: Tasks API
+  version: 1.0.0
+paths:
+  /tasks:
+    post:
+      operationId: createTask
+      parameters:
+        - $ref: '#/components/parameters/Schema'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+              x-go-type: json.RawMessage
+      responses:
+        '201':
+          description: Задача создана
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [id]
+                properties:
+                  id:
+                    type: integer
+                    format: int64
+                    minimum: 1
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '502':
+          $ref: '#/components/responses/BadGateway'
+  /tasks/{id}:
+    get:
+      operationId: getTask
+      description: X-Schema должен совпадать с контрактом задачи или быть одним из его предков. Ответ содержит полный сохранённый raw_params, включая поля потомка.
+      parameters:
+        - $ref: '#/components/parameters/Schema'
+        - $ref: '#/components/parameters/TaskID'
+      responses:
+        '200':
+          description: Сохранённый raw_params
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '502':
+          $ref: '#/components/responses/BadGateway'
+    patch:
+      operationId: patchTask
+      summary: Частичное обновление полей задачи
+      description: Переданные поля верхнего уровня заменяют сохранённые значения. null сохраняется как значение, вложенные объекты и массивы заменяются целиком. Полный результат проверяется по контракту перед сохранением.
+      parameters:
+        - $ref: '#/components/parameters/Schema'
+        - $ref: '#/components/parameters/TaskID'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+              x-go-type: json.RawMessage
+      responses:
+        '204':
+          description: Поля обновлены, updated_at установлен сервером, created_at сохранён
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalError'
+        '502':
+          $ref: '#/components/responses/BadGateway'
+    delete:
+      operationId: deleteTask
+      summary: Удаление задачи
+      description: Удаляет задачу после сверки X-Schema с сохранённым контрактом. Обращение к сервису схем не требуется.
+      parameters:
+        - $ref: '#/components/parameters/Schema'
+        - $ref: '#/components/parameters/TaskID'
+      responses:
+        '204':
+          description: Задача удалена
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalError'
+components:
+  parameters:
+    TaskID:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int64
+        minimum: 1
+    Schema:
+      name: X-Schema
+      in: header
+      required: true
+      schema:
+        type: string
+        example: bug@1
+  schemas:
+    Error:
+      type: object
+      required: [error]
+      properties:
+        code:
+          type: string
+          enum: [invalid_input, not_found, conflict, unavailable]
+          x-go-type: string
+        error:
+          type: string
+  responses:
+    Conflict:
+      description: Контракт из X-Schema недопустим для этой операции
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    BadRequest:
+      description: Неверный заголовок, идентификатор, JSON или поля задачи
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NotFound:
+      description: Задача или контракт не найдены
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    InternalError:
+      description: Внутренняя ошибка
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    BadGateway:
+      description: Schemas-service недоступен или вернул 5xx
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
