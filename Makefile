@@ -8,7 +8,8 @@ lint:
 	go tool golangci-lint run
 
 generate:
-	go tool oapi-codegen -config api/oapi-codegen.yaml api/task-schemas.yaml
+	go tool oapi-codegen -config api/clients/task-schemas/oapi-codegen.yaml api/clients/task-schemas/openapi.yaml
+	go tool golangci-lint fmt
 
 build:
 	go build -o bin/tailor ./cmd

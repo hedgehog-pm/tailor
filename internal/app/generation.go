@@ -11,7 +11,7 @@ import (
 
 	"github.com/hedgehog-pm/tailor/internal/codegen"
 	"github.com/hedgehog-pm/tailor/internal/config"
-	"github.com/hedgehog-pm/tailor/internal/generated/schemas"
+	schemas "github.com/hedgehog-pm/tailor/internal/generated/clients/taskschemas"
 	"github.com/hedgehog-pm/tailor/internal/schema"
 )
 

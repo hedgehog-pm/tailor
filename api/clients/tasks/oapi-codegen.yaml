@@ -1,0 +1,9 @@
+# Source: https://github.com/hedgehog-pm/service-tasks/blob/0c14d16750cbb30e7d4e081e2f972b91da0e6fe4/api/server/openapi.yaml
+package: task
+generate:
+  client: true
+  models: true
+output-options:
+  client-type-name: HTTPClient
+  include-operation-ids:
+    - getTask

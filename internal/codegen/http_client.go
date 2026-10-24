@@ -6,24 +6,25 @@ import (
 
 	"github.com/getkin/kin-openapi/openapi3"
 	oapi "github.com/oapi-codegen/oapi-codegen/v2/pkg/codegen"
+	"go.yaml.in/yaml/v3"
 
-	"github.com/hedgehog-pm/tailor/api"
+	tasksapi "github.com/hedgehog-pm/tailor/api/clients/tasks"
 )
 
 func GenerateHTTPClient(packageName string) ([]byte, error) {
-	spec, err := openapi3.NewLoader().LoadFromData(api.Tasks)
+	spec, err := openapi3.NewLoader().LoadFromData(tasksapi.OpenAPI)
 	if err != nil {
 		return nil, err
 	}
 
-	source, err := oapi.Generate(spec, oapi.Configuration{
-		PackageName: packageName,
-		Generate:    oapi.GenerateOptions{Models: true, Client: true},
-		OutputOptions: oapi.OutputOptions{
-			ClientTypeName:      "HTTPClient",
-			IncludeOperationIDs: []string{"getTask"},
-		},
-	})
+	var options oapi.Configuration
+	if err := yaml.Unmarshal(tasksapi.Codegen, &options); err != nil {
+		return nil, err
+	}
+
+	options.PackageName = packageName
+
+	source, err := oapi.Generate(spec, options)
 	if err != nil {
 		return nil, err
 	}

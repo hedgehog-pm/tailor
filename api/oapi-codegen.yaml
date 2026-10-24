@@ -1,5 +1,0 @@
-package: schemas
-generate:
-  client: true
-  models: true
-output: internal/generated/schemas/client.go

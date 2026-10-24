@@ -1,0 +1,9 @@
+# Source: https://github.com/hedgehog-pm/service-task-schemas/blob/3bc17115ca2704b70c0391012a99fcb413edaed9/api/server/openapi.yaml
+package: taskschemas
+generate:
+  client: true
+  models: true
+output: internal/generated/clients/taskschemas/client.gen.go
+output-options:
+  include-operation-ids:
+    - getSchema
